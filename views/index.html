@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <!-- <link rel="stylesheet" href="public\style.css"> -->
+    <!-- Link FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0979e9;
+            /* Dark Blue Background */
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .main-heading {
+            font-size: 48px;
+            /* Large size for main heading */
+            color: #ffffff;
+            margin-bottom: 20px;
+            /* Space between heading and the box */
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            /* Adds a stylish shadow to the text */
+        }
+
+        .todo-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 500px;
+        }
+
+        .title {
+            color: #004080;
+            /* Dark Blue */
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 75%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #ff4800;
+            /* Dark Blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button i {
+            margin-right: 5px;
+        }
+
+        button:hover {
+            background-color: #041eb0;
+            /* Slightly darker blue */
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #e0f0ff;
+            /* Light Blue */
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li button {
+            background-color: #ff5e5e;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        li button:hover {
+            background-color: #ff4242;
+        }
+
+        li i {
+            font-size: 18px;
+        }
+
+        li.completed {
+            text-decoration: line-through;
+            color: #bbb;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <h1 class="main-heading">My To-Do List</h1> -->
+    <div class="todo-container">
+        <h1 class="title">To-Do List</h1>
+        <form id="addTodoForm">
+            <input type="text" id="newTodo" placeholder="Enter a task..." required>
+            <button type="submit" id="addBtn">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </form>
+        <ul id="todoList"></ul>
+    </div>
+    <!-- <script src="public\script.js"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTodos();
+
+            document.getElementById('addTodoForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addTodo();
+            });
+
+            document.getElementById('todoList').addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    deleteTask(e.target.dataset.index);
+                } else if (e.target.classList.contains('complete-btn')) {
+                    toggleComplete(e.target.dataset.index);
+                }
+            });
+        });
+
+        function loadTodos() {
+            const todos = getTodosFromLocalStorage();
+            renderTodos(todos);
+        }
+
+        function getTodosFromLocalStorage() {
+            return JSON.parse(localStorage.getItem('todos')) || [];
+        }
+
+        function setTodosToLocalStorage(todos) {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function addTodo() {
+            const newTodo = document.getElementById('newTodo').value;
+            if (newTodo.trim()) {
+                const todos = getTodosFromLocalStorage();
+                todos.push({ task: newTodo, completed: false });
+                setTodosToLocalStorage(todos);
+                renderTodos(todos);
+                document.getElementById('newTodo').value = ''; // Clear input
+            }
+        }
+
+        function deleteTask(index) {
+            const todos = getTodosFromLocalStorage();
+            todos.splice(index, 1);
+            setTodosToLocalStorage(todos);
+            renderTodos(todos);
+        }
+
+        function toggleComplete(index) {
+            const todos = getTodosFromLocalStorage();
+            todos[index].completed = !todos[index].completed;
+            setTodosToLocalStorage(todos);
+            renderTodos(todos);
+        }
+
+        function renderTodos(todos) {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = ''; // Clear list
+
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.classList.toggle('completed', todo.completed);
+                li.innerHTML = `
+            ${todo.task}
+            <div>
+                <button class="complete-btn" data-index="${index}">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="delete-btn" data-index="${index}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        `;
+                todoList.appendChild(li);
+            });
+        }
+
+    </script>
+</body>
+
+</html>
